@@ -1,8 +1,11 @@
-import { withApollo } from '../apollo/client'
+import Head from 'next/head';
 import gql from 'graphql-tag'
 import get from 'lodash/get';
 import { useQuery } from '@apollo/react-hooks'
 import styled from 'styled-components';
+
+// helpers
+import { withApollo } from '../apollo/client'
 
 // GQL query
 const query = gql`
@@ -111,6 +114,19 @@ const Index = () => {
   if (matches) {
     return (
       <>
+        <Head>
+          <title>What are football scores?</title>
+          <meta property='og:site_name' content='follow.soccer' />
+          <meta property='description' content='Just see the scores for today!' />
+          <meta property='twitter:site' content='@thejamesbliss' />
+          <meta property='twitter:card' content='summary_large_image' />
+          <meta property='twitter:title' content='follow.soccer?' />
+          <meta property='og:description' content='Just see the scores for today!' />
+          <meta property='og:title' content='follow.soccer?' />
+          <meta property='og:type' content='website' />
+          <meta property='og:url' content='https://follow.soccer' />
+        </Head>
+
         {matches.map(match => {
           const homeTeamName= get(match, 'homeTeam.name', '-');
           const homeTeamScore= get(match, 'score.fullTime.homeTeam', '-');
