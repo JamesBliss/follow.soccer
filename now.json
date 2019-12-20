@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "name": "follow.soccer",
+  "alias": "follow.soccer",
+  "regions": ["bru", "bru1"],
+  "env": {
+    "GA_KEY": "@ga_key",
+    "FOOTBALL_KEY": "@football_key"
+  }
+}
