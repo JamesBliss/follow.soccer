@@ -3,12 +3,7 @@ const { GraphQLError } = require('graphql/error');
 const cache = require('./cache');
 var Color = require('color');
 
-
 const { calculateRatio } = require('./helpers');
-const ColorThief = require('./thief');
-
-//
-const colorThief = new ColorThief();
 
 //
 const KEY = process.env.FOOTBALL_KEY;
@@ -57,12 +52,6 @@ module.exports = {
   getTeam: async (url) => {
     const res = await fetch(url, { headers: { "X-Auth-Token": KEY } });
     const data = await res.json();
-    const imageRes = await fetch(data.crestUrl);
-
-    // Get the colour palette
-    const buffer = await imageRes.buffer();
-    const palette = colorThief.getPalette(buffer);
-    const teamPalette = commonColorsWithContrast({palette});
 
     if (data.errorCode) {
       throw new GraphQLError(
@@ -73,7 +62,7 @@ module.exports = {
       );
     }
 
-    const team = { ...data, colours: teamPalette };
+    const team = { ...data };
     cache.set(url, { ...team, ...{ cached: new Date() } });
 
     return team;
@@ -82,33 +71,10 @@ module.exports = {
     const res = await fetch(url, { headers: { "X-Auth-Token": KEY } });
     const data = await res.json();
 
-    const promises = data.teams.map(team => {
-      return new Promise(async (res, rej) => {
-        if (team.crestUrl) {
-          const imageRes = await fetch(team.crestUrl);
-          if (imageRes.status === 200) {
-            // Get the colour palette
-            const buffer = await imageRes.buffer();
-            const palette = colorThief.getPalette(buffer);
-            const teamPalette = commonColorsWithContrast({ palette });
-
-            res({ ...team, colours: teamPalette });
-          } else {
-            res(team);
-          }
-        } else {
-          res(team);
-        }
-      });
-    });
-
-    const colourAddition = await Promise.all(promises);
-
     const mergedData = {
       ...data,
       teams: {
-        ...data.teams,
-        ...colourAddition
+        ...data.teams
       }
     }
 
