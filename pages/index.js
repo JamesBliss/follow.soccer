@@ -35,6 +35,7 @@ const query = gql`
 // styled components
 const Match = styled.div`
   display: flex;
+  position: relative;
   align-items: center;
   padding: 4vmin;
 
@@ -49,6 +50,17 @@ const Match = styled.div`
   & + & {
     margin-top: 30px;
   }
+`;
+
+const Label = styled.span`
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  font-size: 0.8em;
+  transform: translateX(-50%);
+  padding: 5px 15px;
+  background: #f2f2f2;
+  border-radius: 20px;
 `;
 
 const Home = styled.span`
@@ -99,18 +111,34 @@ const Index = () => {
 
   const matches = get(data, 'matches.matches', null);
 
+  console.log(matches)
+
   if (matches) {
     return (
       <>
         {matches.map(match => {
+          const homeTeamName= get(match, 'homeTeam.name', '-');
+          const homeTeamScore= get(match, 'score.fullTime.homeTeam', '-');
+          const awayTeamName = get(match, 'awayTeam.name', '-');
+          const awayTeamScore = get(match, 'score.fullTime.awayTeam', '-');
+
+          const labels = {
+            IN_PLAY: "In play",
+            POSTPONED: "Postponed",
+            CANCELED: "Canceled",
+            SUSPENDED: "Suspended",
+            PAUSED: "Paused",
+            FINISHED: "Finished"
+          }
+
           return (
             <Match key={match.id}>
-              {/* <p>status: {match.status}</p> */}
+              <Label>{labels[match.status]}</Label>
               <Home>
-                {match.homeTeam.name} <span>{match.score.fullTime.homeTeam || '-'}</span>
+                {homeTeamName} <span>{homeTeamScore}</span>
               </Home>
               <Away>
-                <span>{match.score.fullTime.awayTeam || '-'}</span> {match.awayTeam.name}
+                <span>{awayTeamScore}</span> {awayTeamName}
               </Away>
             </Match>
           )
