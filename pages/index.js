@@ -52,8 +52,6 @@ const Match = styled.div`
 
   & + & {
     border-top: 5px solid #000;
-    /* margin-top: 30px; */
-
   }
 `;
 
@@ -71,9 +69,10 @@ const Pill = styled.span`
   background: #f2f2f2;
   border-radius: 20px;
   margin: 0 5px;
+  white-space: nowrap;
 `;
 
-const Home = styled.span`
+const Team = styled.span`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -86,29 +85,8 @@ const Home = styled.span`
     text-overflow: ellipsis;
   }
 
-  @media(min-width: 640px) {
-    font-size: 2.2em;
-  }
-
-  width: 50%;
-  color: rgb(33, 33, 33);
-
   span {
     padding: 0 15px;
-  }
-`;
-
-const Away = styled.span`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 35px 0;
-  font-size: 1.2em;
-
-  div {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 
   @media(min-width: 640px) {
@@ -116,12 +94,9 @@ const Away = styled.span`
   }
 
   width: 50%;
-  color: rgb(222, 222, 222);
-
-  span {
-    padding: 0 15px;
-  }
+  color: ${ ({colour}) => colour };
 `;
+
 
 // exported component
 const Index = () => {
@@ -132,8 +107,6 @@ const Index = () => {
   if (loading || error) return null;
 
   const matches = get(data, 'matches.matches', null);
-
-  console.log(matches)
 
   if (matches) {
     return (
@@ -155,12 +128,12 @@ const Index = () => {
 
           return (
             <Match key={match.id}>
-              <Home>
+              <Team colour="rgb(51, 51, 51)">
                 <div>{homeTeamName}</div> <span>{homeTeamScore !== null ? homeTeamScore : '-'}</span>
-              </Home>
-              <Away>
+              </Team>
+              <Team colour="rgb(222, 222, 222)">
                 <span>{awayTeamScore !== null ? awayTeamScore : '-'}</span> <div>{awayTeamName}</div>
-              </Away>
+              </Team>
               <Tags>
                 <Pill>{labels[match.status]}</Pill>
                 <Pill>{match.competition.name}</Pill>
