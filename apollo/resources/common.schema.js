@@ -1,3 +1,5 @@
+
+
 module.exports = `
   type Squad {
     id: Int
@@ -40,6 +42,7 @@ module.exports = `
     days: Int
     hours: Int
     minutes: Int
+    fromNow: String
   }
   type Result {
     homeTeam: Int

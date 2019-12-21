@@ -18,6 +18,13 @@ const query = gql`
         competition {
           name
         }
+        utcDate
+        time {
+          days,
+          hours,
+          minutes,
+          fromNow
+        }
         homeTeam {
           id
           name
@@ -73,6 +80,7 @@ const Pill = styled.span`
   border-radius: 20px;
   margin: 0 5px;
   white-space: nowrap;
+  text-transform: capitalize;
 `;
 
 const Team = styled.span`
@@ -112,6 +120,11 @@ const Index = () => {
   const matches = get(data, 'matches.matches', null);
 
   if (matches) {
+
+    matches.sort(function(a, b) {
+      return new Date(b.date) - new Date(a.date);
+    });
+
     return (
       <>
         <Head>
@@ -133,6 +146,10 @@ const Index = () => {
           const awayTeamName = get(match, 'awayTeam.name', '-');
           const awayTeamScore = get(match, 'score.fullTime.awayTeam', '-');
 
+          const {fromNow } = get(match, 'time');
+
+          console.log(match)
+
           const labels = {
             IN_PLAY: "In play",
             POSTPONED: "Postponed",
@@ -151,7 +168,8 @@ const Index = () => {
                 <span>{awayTeamScore !== null ? awayTeamScore : '-'}</span> <div>{awayTeamName}</div>
               </Team>
               <Tags>
-                <Pill>{labels[match.status]}</Pill>
+                {labels[match.status] && <Pill>{labels[match.status]}</Pill>}
+                {!labels[match.status] && <Pill>{ fromNow }</Pill>}
                 <Pill>{match.competition.name}</Pill>
               </Tags>
             </Match>

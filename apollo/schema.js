@@ -14,7 +14,7 @@ var commonQuery = require('./resources/common.query');
 var teamQuery = require('./resources/team.query');
 var matchQuery = require('./resources/match.query');
 
-// Mutations
+// mutations
 
 // resolvers
 var commonResolvers = require('./resources/common.resolvers');
@@ -36,10 +36,11 @@ const typeDefs = gql`
 // Provide resolver functions for your schema fields
 const resolvers = {
   Query: {
-    ...commonResolvers,
-    ...matchResolvers,
+    ...commonResolvers.Queries,
+    ...matchResolvers.Queries,
     ...teamResolvers
-  }
+  },
+  ...commonResolvers.Types
 };
 
 //
