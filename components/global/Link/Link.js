@@ -15,7 +15,11 @@ const ActiveLink = ({ router, children, href, additionalPaths = [], activeClassN
     return React.cloneElement(child, { className });
   }
 
-  return <Link href={href}>{React.cloneElement(child, { className, ...rest })}</Link>;
+  return (
+    <Link href={href} passHref>
+      {React.cloneElement(child, { className, ...rest })}
+    </Link>
+  );
 };
 
 export default withRouter(ActiveLink);

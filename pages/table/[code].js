@@ -1,7 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 
-// local components
+// components
+import Page from '~/components/global/Page';
 import Table from '~/components/table/Table';
 
 // config
@@ -61,11 +62,13 @@ const Tables = ({ table }) => {
   const { standings } = table;
 
   return (
-    <Wrapper>
-      {standings.map((standing, index) => (
-        <Table key={index} data={standing.table} />
-      ))}
-    </Wrapper>
+    <Page>
+      <Wrapper>
+        {standings.map((standing, index) => (
+          <Table key={index} data={standing.table} />
+        ))}
+      </Wrapper>
+    </Page>
   );
 };
 

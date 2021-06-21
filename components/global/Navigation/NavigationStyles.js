@@ -2,12 +2,15 @@ import styled from 'styled-components';
 
 export const Menu = styled.nav`
   width: 100%;
-  background: lime;
   display: grid;
+  background: #fff;
   grid-template-columns: 1fr 1fr 1fr;
+
+  box-shadow: -2px -2px 6px 2px rgb(0 0 0 / 13%), 0 3px 6px rgb(0 0 0 / 13%);
+  z-index: 10;
 `;
 
-export const MenuItem = styled.button`
+export const MenuItem = styled.a`
   box-sizing: border-box;
   -webkit-appearance: none;
   cursor: pointer;
@@ -20,15 +23,17 @@ export const MenuItem = styled.button`
   flex: 1;
   justify-content: center;
   align-items: center;
+  font-weight: normal;
   width: 100%;
-  font-size: 30px;
+  font-size: 24px;
   text-align: center;
   cursor: pointer;
-  padding: 13px;
+  padding: 20px;
   z-index: 1;
-  background: #fff;
+  text-decoration: none;
+  color: #333;
 
   &:hover {
-    background: #333;
+    background: #a1a1a1;
   }
 `;

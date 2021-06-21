@@ -1,18 +1,9 @@
 import React from 'react';
-import Router from 'next/router'
-import styled from 'styled-components'
 
-// helpers
-import { isBrowser } from '../../lib/helpers';
+import styled from 'styled-components';
 
 // components
-import GlobalStyles from './Styles';
-import Meta from './Meta';
-import Navigation from './Navigation'
-
-Router.events.on('routeChangeComplete', (url) => {
-  if (isBrowser) window.ma.trackEvent('Event', 'navigate', `pageview--${url}`);
-});
+import Navigation from './Navigation';
 
 const Content = styled.div`
   height: 100vh;
@@ -27,19 +18,13 @@ const Main = styled.main`
   -webkit-overflow-scrolling: touch;
 `;
 
-const Page = ({ children}) => {
-  return (
-    <React.Fragment>
-      <GlobalStyles />
-      <Meta />
-      <Content>
-        <Main>
-          { children }
-        </Main>
-        <Navigation />
-      </Content>
-    </React.Fragment>
-  );
-}
+const Page = ({ children }) => (
+  <>
+    <Content>
+      <Main>{children}</Main>
+      <Navigation />
+    </Content>
+  </>
+);
 
 export default Page;

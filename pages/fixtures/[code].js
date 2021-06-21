@@ -5,7 +5,8 @@ import styled from 'styled-components';
 import { addApolloState, initializeApollo } from '../../lib/apollo';
 import { GET_FIXTURES } from '../../lib/queries';
 
-// local components
+// components
+import Page from '~/components/global/Page';
 import Day from '~/components/fixtures/Day';
 
 //
@@ -60,11 +61,13 @@ const Fixtures = ({ fixtures }) => {
   const { days } = fixtures;
 
   return (
-    <Wrapper>
-      {days.map((day) => (
-        <Day key={day.utcDate} data={day} />
-      ))}
-    </Wrapper>
+    <Page>
+      <Wrapper>
+        {days.map((day) => (
+          <Day key={day.utcDate} data={day} />
+        ))}
+      </Wrapper>
+    </Page>
   );
 };
 
