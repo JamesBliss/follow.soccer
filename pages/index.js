@@ -1,49 +1,37 @@
-import Head from 'next/head';
-import gql from 'graphql-tag'
-import get from 'lodash/get';
-import { useQuery } from '@apollo/react-hooks'
+import { useQuery } from '@apollo/client';
 import styled from 'styled-components';
+import get from 'lodash/get';
 
-// helpers
-import { withApollo } from '../apollo/client'
+// config
+import { addApolloState, initializeApollo } from '../lib/apollo';
+import { GET_MATCHES } from '../lib/queries';
 
-// GQL query
-const query = gql`
-  query matches {
-    matches {
-      cached
-      matches {
-        status
-        id
-        competition {
-          name
-        }
-        utcDate
-        time {
-          days,
-          hours,
-          minutes,
-          fromNow
-        }
-        homeTeam {
-          id
-          name
-        }
-        awayTeam {
-          id
-          name
-        }
-        score {
-          duration
-          fullTime {
-            homeTeam
-            awayTeam
-          }
-        }
-      }
-    }
+//
+export async function getStaticProps(context, ...rest) {
+  const apolloClient = initializeApollo();
+
+  try {
+    const [{ data }] = await Promise.all([
+      apolloClient.query({
+        query: GET_MATCHES,
+      }),
+    ]);
+
+    const notFound = !data?.matches;
+
+    return addApolloState(apolloClient, {
+      props: {
+        matches: data?.matches,
+      },
+      notFound,
+      revalidate: 60, // Every minute
+    });
+  } catch (error) {
+    error.ctx = context;
+    console.log(error);
+    throw error;
   }
-`;
+}
 
 // styled components
 const Match = styled.div`
@@ -53,12 +41,13 @@ const Match = styled.div`
   padding: 2vmin 4vmin;
 
   background: linear-gradient(
-    120deg,
-    rgb(222, 222, 222) 0%,
-    rgb(222, 222, 222) 50%,
-    rgb(51, 51, 51) 50%,
-    rgb(51, 51, 51) 100%
-  ) 0% 0% / 100% 100%;
+      120deg,
+      rgb(222, 222, 222) 0%,
+      rgb(222, 222, 222) 50%,
+      rgb(51, 51, 51) 50%,
+      rgb(51, 51, 51) 100%
+    )
+    0% 0% / 100% 100%;
 
   & + & {
     border-top: 5px solid #000;
@@ -100,64 +89,47 @@ const Team = styled.span`
     padding: 0 15px;
   }
 
-  @media(min-width: 640px) {
+  @media (min-width: 640px) {
     font-size: 2.2em;
   }
 
   width: 50%;
-  color: ${ ({colour}) => colour };
+  color: ${({ colour }) => colour};
 `;
-
 
 // exported component
 const Index = () => {
-  const {
-    data, loading, error
-  } = useQuery(query)
+  const { data, loading, error } = useQuery(GET_MATCHES);
 
   if (loading || error) return null;
 
   const matches = get(data, 'matches.matches', null);
 
-  if (matches) {
+  console.log({ matches });
 
-    matches.sort(function(a, b) {
-      return new Date(b.date) - new Date(a.date);
-    });
+  if (matches) {
+    // matches.slice().matches.sort(function (a, b) {
+    //   return new Date(b.utcDate) - new Date(a.utcDate);
+    // });
 
     return (
       <>
-        <Head>
-          <title>What are football scores?</title>
-          <meta property='og:site_name' content='follow.soccer' />
-          <meta property='description' content='Just see the scores for today!' />
-          <meta property='twitter:site' content='@thejamesbliss' />
-          <meta property='twitter:card' content='summary_large_image' />
-          <meta property='twitter:title' content='follow.soccer?' />
-          <meta property='og:description' content='Just see the scores for today!' />
-          <meta property='og:title' content='follow.soccer?' />
-          <meta property='og:type' content='website' />
-          <meta property='og:url' content='https://follow.soccer' />
-        </Head>
-
-        {matches.map(match => {
-          const homeTeamName= get(match, 'homeTeam.name', '-');
-          const homeTeamScore= get(match, 'score.fullTime.homeTeam', '-');
+        {matches.map((match) => {
+          const homeTeamName = get(match, 'homeTeam.name', '-');
+          const homeTeamScore = get(match, 'score.fullTime.homeTeam', '-');
           const awayTeamName = get(match, 'awayTeam.name', '-');
           const awayTeamScore = get(match, 'score.fullTime.awayTeam', '-');
 
-          const {fromNow } = get(match, 'time');
-
-          console.log(match)
+          const { fromNow } = get(match, 'time');
 
           const labels = {
-            IN_PLAY: "In play",
-            POSTPONED: "Postponed",
-            CANCELED: "Canceled",
-            SUSPENDED: "Suspended",
-            PAUSED: "Paused",
-            FINISHED: "Finished"
-          }
+            IN_PLAY: 'In play',
+            POSTPONED: 'Postponed',
+            CANCELED: 'Canceled',
+            SUSPENDED: 'Suspended',
+            PAUSED: 'Paused',
+            FINISHED: 'Finished',
+          };
 
           return (
             <Match key={match.id}>
@@ -169,17 +141,17 @@ const Index = () => {
               </Team>
               <Tags>
                 {labels[match.status] && <Pill>{labels[match.status]}</Pill>}
-                {!labels[match.status] && <Pill>{ fromNow }</Pill>}
+                {!labels[match.status] && <Pill>{fromNow}</Pill>}
                 <Pill>{match.competition.name}</Pill>
               </Tags>
             </Match>
-          )
+          );
         })}
       </>
-    )
+    );
   }
 
-  return null
-}
+  return null;
+};
 
-export default withApollo(Index)
+export default Index;

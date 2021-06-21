@@ -1,25 +1,20 @@
-import App from 'next/app'
-import Router from 'next/router'
+import { ApolloProvider } from '@apollo/client';
 
-import * as gtag from '../lib/ga';
+import Page from '../components/global/Page';
 
-// imported components
-import Page from '../components/page';
+import { useApollo } from '../lib/apollo';
 
-// function
-Router.events.on('routeChangeComplete', url => gtag.pageview(url))
+// export
+const MyApp = ({ Component, pageProps }) => {
+  const apolloClient = useApollo(pageProps);
 
-// exported components
-class MyApp extends App {
-  render() {
-    const { Component, pageProps } = this.props;
-
-    return (
-        <Page>
-          <Component {...pageProps} />
-        </Page>
-    );
-  }
+  return (
+    <ApolloProvider client={apolloClient}>
+      <Page>
+        <Component {...pageProps} />
+      </Page>
+    </ApolloProvider>
+  );
 }
 
 export default MyApp;
