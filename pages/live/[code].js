@@ -10,11 +10,28 @@ import { comps } from '~/lib/config';
 import Page from '~/components/global/Page';
 
 //
-export async function getStaticProps(context) {
+export const getServerSideProps = async (context) => {
   const apolloClient = initializeApollo();
   const { code } = context.params;
 
   const { id } = comps.find((com) => com.code === code.toUpperCase());
+
+  if (!id) {
+    const error = {
+      query: context.query,
+      resolvedUrl: context.resolvedUrl,
+      params: context.params,
+      locales: context.locales,
+      locale: context.locale,
+      defaultLocale: context.defaultLocale,
+    };
+
+    console.log(error);
+
+    return {
+      notFound: true,
+    };
+  }
 
   try {
     const [{ data }] = await Promise.all([
@@ -26,23 +43,42 @@ export async function getStaticProps(context) {
       }),
     ]);
 
-    const notFound = !data?.matchesToday;
+    const notFound = !data?.nextMatchesByCompetition.data;
 
     return addApolloState(apolloClient, {
       props: {
-        matches: data?.matchesToday?.matches,
+        matches: data?.nextMatchesByCompetition?.data?.matches,
+        errors: data?.nextMatchesByCompetition?.errors,
       },
       notFound,
-      revalidate: 60, // Every minute
     });
   } catch (error) {
-    error.ctx = context;
+    error.ctx = {
+      query: context.query,
+      resolvedUrl: context.resolvedUrl,
+      params: context.params,
+      locales: context.locales,
+      locale: context.locale,
+      defaultLocale: context.defaultLocale,
+    };
+
     console.log(error);
-    throw error;
+
+    return {
+      notFound: true,
+    };
   }
-}
+};
 
 // styled components
+const Wrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+`;
+
 const Match = styled.div`
   display: flex;
   position: relative;
@@ -106,13 +142,6 @@ const Team = styled.span`
   color: ${({ colour }) => colour};
 `;
 
-export async function getStaticPaths() {
-  return {
-    paths: [],
-    fallback: 'blocking',
-  };
-}
-
 // exported component
 const Live = ({ matches }) => (
   <Page>
@@ -150,6 +179,11 @@ const Live = ({ matches }) => (
           </Match>
         );
       })}
+    {matches.length === 0 && (
+      <Wrapper>
+        <h1>No matches today</h1>
+      </Wrapper>
+    )}
   </Page>
 );
 

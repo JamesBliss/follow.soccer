@@ -10,7 +10,7 @@ import Page from '~/components/global/Page';
 import Day from '~/components/fixtures/Day';
 
 //
-export async function getStaticProps(context) {
+export const getServerSideProps = async (context) => {
   const apolloClient = initializeApollo();
   const { code } = context.params;
 
@@ -24,28 +24,31 @@ export async function getStaticProps(context) {
       }),
     ]);
 
-    const notFound = !data?.competitionCurrentMatchday;
+    const notFound = !data?.competitionCurrentMatchday.data;
 
     return addApolloState(apolloClient, {
       props: {
-        fixtures: data?.competitionCurrentMatchday,
+        fixtures: data?.competitionCurrentMatchday.data,
       },
       notFound,
-      revalidate: 60, // Every minute
     });
   } catch (error) {
-    error.ctx = context;
-    console.log(error);
-    throw error;
-  }
-}
+    error.ctx = {
+      query: context.query,
+      resolvedUrl: context.resolvedUrl,
+      params: context.params,
+      locales: context.locales,
+      locale: context.locale,
+      defaultLocale: context.defaultLocale,
+    };
 
-export async function getStaticPaths() {
-  return {
-    paths: [],
-    fallback: 'blocking',
-  };
-}
+    console.log(error);
+
+    return {
+      notFound: true,
+    };
+  }
+};
 
 // styled
 export const Wrapper = styled.div`
@@ -59,6 +62,8 @@ export const Wrapper = styled.div`
 // exported component
 const Fixtures = ({ fixtures }) => {
   const { days } = fixtures;
+
+  console.log(fixtures);
 
   return (
     <Page>

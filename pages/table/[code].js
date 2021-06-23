@@ -10,7 +10,7 @@ import { addApolloState, initializeApollo } from '~/lib/apollo';
 import { GET_TABLE } from '~/lib/queries';
 
 //
-export async function getStaticProps(context) {
+export const getServerSideProps = async (context) => {
   const apolloClient = initializeApollo();
   const { code } = context.params;
 
@@ -20,33 +20,36 @@ export async function getStaticProps(context) {
         query: GET_TABLE,
         variables: {
           code: code.toUpperCase(),
-          filter: 'TOTAL',
         },
       }),
     ]);
 
-    const notFound = !data?.competitionStandings;
+    const notFound = !data?.competitionStandings.data;
 
     return addApolloState(apolloClient, {
       props: {
-        table: data?.competitionStandings,
+        table: data?.competitionStandings.data,
+        errors: data?.competitionStandings.errors,
       },
       notFound,
-      revalidate: 60, // Every minute
     });
   } catch (error) {
-    error.ctx = context;
-    console.log(error);
-    throw error;
-  }
-}
+    error.ctx = {
+      query: context.query,
+      resolvedUrl: context.resolvedUrl,
+      params: context.params,
+      locales: context.locales,
+      locale: context.locale,
+      defaultLocale: context.defaultLocale,
+    };
 
-export async function getStaticPaths() {
-  return {
-    paths: [],
-    fallback: 'blocking',
-  };
-}
+    console.log(error);
+
+    return {
+      notFound: true,
+    };
+  }
+};
 
 // styled
 export const Wrapper = styled.div`
@@ -57,17 +60,32 @@ export const Wrapper = styled.div`
   flex-direction: column;
 `;
 
+const Container = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+`;
+
 // exported component
 const Tables = ({ table }) => {
   const { standings } = table;
+  const hasStandings = !!standings;
 
   return (
     <Page>
-      <Wrapper>
-        {standings.map((standing, index) => (
-          <Table key={index} data={standing.table} />
+      {hasStandings &&
+        standings.map((standing, index) => (
+          <Wrapper>
+            <Table key={index} data={standing.table} />
+          </Wrapper>
         ))}
-      </Wrapper>
+      {!hasStandings && (
+        <Container>
+          <h1>No active table</h1>
+        </Container>
+      )}
     </Page>
   );
 };
